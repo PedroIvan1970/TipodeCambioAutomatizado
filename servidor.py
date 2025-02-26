@@ -38,11 +38,16 @@ def obtener_tipo_cambio():
         serie_usd_hist = data_usd_hist.get("bmx", {}).get("series", [])[0]
         historial_usd = serie_usd_hist.get("datos", [])  # Lista con los últimos 20 días hábiles
 
-        resultado["USD_HIST"] = historial_usd
+        if historial_usd:
+            # Convertir valores a float y asegurarnos de que la lista esté ordenada correctamente
+            resultado["USD_HIST"] = [
+                {"fecha": item["fecha"], "dato": float(item["dato"].replace(',', ''))} 
+                for item in historial_usd if item["dato"] not in ["N/E", ""]
+            ]
 
-        # 2️⃣ Encontrar el USD del día anterior hábil
-        if len(historial_usd) > 1:
-            resultado["USD_YESTERDAY"] = historial_usd[-2]  # El penúltimo valor en la lista
+            # 2️⃣ Encontrar el USD del día anterior hábil
+            if len(resultado["USD_HIST"]) > 1:
+                resultado["USD_YESTERDAY"] = resultado["USD_HIST"][-2]  # El penúltimo valor en la lista
 
     # 3️⃣ Consulta del USD (hoy)
     response_usd_today = requests.get(API_URL_USD_TODAY, headers=headers)
@@ -50,7 +55,11 @@ def obtener_tipo_cambio():
         data_usd_today = response_usd_today.json()
         serie_usd_today = data_usd_today.get("bmx", {}).get("series", [])[0]
         if serie_usd_today.get("datos"):
-            resultado["USD_TODAY"] = serie_usd_today.get("datos")[0]  # Solo la cotización de hoy
+            dato_usd_today = serie_usd_today.get("datos")[0]
+            resultado["USD_TODAY"] = {
+                "fecha": dato_usd_today["fecha"],
+                "dato": float(dato_usd_today["dato"].replace(',', '')) if dato_usd_today["dato"] not in ["N/E", ""] else None
+            }
 
     # 4️⃣ Consulta de otras divisas (solo la más reciente)
     response_otras = requests.get(API_URL_OTRAS, headers=headers)
@@ -64,7 +73,7 @@ def obtener_tipo_cambio():
                 valor = serie.get("datos")[0].get("dato")
                 fecha = serie.get("datos")[0].get("fecha")
 
-                # 🔹 Verificar si el valor es "N/E" y reemplazarlo por None
+                # 🔹 Convertir a float y manejar "N/E" como None
                 resultado[nombre_divisa] = {
                     "fecha": fecha,
                     "dato": float(valor.replace(',', '')) if valor not in ["N/E", ""] else None
