@@ -7,24 +7,20 @@ app = Flask(__name__)
 # Token de acceso de Banxico
 API_TOKEN = os.getenv("BANXICO_API_KEY")
 
-# Series de Banxico
+# Series de Banxico con los códigos corregidos
 SERIES = {
     "USD_HIST": "SF43718",  # Dólar estadounidense (últimos 20 días hábiles)
     "USD_TODAY": "SF43718",  # Dólar estadounidense (hoy)
-    "USD_YESTERDAY": "SF43718",  # Dólar estadounidense (día anterior hábil)
     "EUR": "SF46410",  # Euro
-    "CAD": "SF60632",  # Dólar canadiense
     "GBP": "SF46407",  # Libra esterlina
     "CNY": "SF290383",  # Yuan chino
-    "JPY": "SF46406",  # Yen japonés
-    "BRL": "SF57767",  # Real brasileño
-    "ARS": "SF57751"   # Peso argentino
+    "JPY": "SF46406"  # Yen japonés
 }
 
 # URLs para obtener los datos
 API_URL_USD_HIST = f"https://www.banxico.org.mx/SieAPIRest/service/v1/series/{SERIES['USD_HIST']}/datos/20"
 API_URL_USD_TODAY = f"https://www.banxico.org.mx/SieAPIRest/service/v1/series/{SERIES['USD_TODAY']}/datos/oportuno"
-API_URL_OTRAS = f"https://www.banxico.org.mx/SieAPIRest/service/v1/series/{','.join([v for k, v in SERIES.items() if k not in ['USD_HIST', 'USD_TODAY', 'USD_YESTERDAY']])}/datos/oportuno"
+API_URL_OTRAS = f"https://www.banxico.org.mx/SieAPIRest/service/v1/series/{','.join([v for k, v in SERIES.items() if k not in ['USD_HIST', 'USD_TODAY']])}/datos/oportuno"
 
 @app.route('/')
 def home():
@@ -78,4 +74,3 @@ def obtener_tipo_cambio():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-
