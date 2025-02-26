@@ -3,9 +3,14 @@ import requests
 
 app = Flask(__name__)
 
-# Token de acceso de Banxico (Sustituye con tu clave real)
-API_TOKEN = "f97e9ded6e03d00d516e37fdf710adb9c87c1aa2f3abe05bc4cb5a1d2c3e608d"
+# Token de acceso de Banxico (Sustituye con una variable de entorno)
+import os
+API_TOKEN = os.getenv("BANXICO_API_KEY")
 API_URL = "https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno"
+
+@app.route('/')
+def home():
+    return "¡El servidor está funcionando correctamente! Usa /tipo-cambio para obtener datos."
 
 @app.route('/tipo-cambio', methods=['GET'])
 def obtener_tipo_cambio():
